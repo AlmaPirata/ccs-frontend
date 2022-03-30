@@ -1,17 +1,20 @@
 import axios from "axios";
 
-export const goodsModule = {
+export const dataModule = {
   state: () => ({
-    goodsByGroups: {},
-    names: {},
+    products: {},
+    groups_data: {},
     currencies: {
       usd: 70
     },
     cart: []
   }),
   getters: {
-    goodsByGroups(state) {
-      return state.goodsByGroups;
+    getProducts(state) {
+      return state.products;
+    },
+    getGroups(state) {
+      return state.groups_data;
     },
     cart(state) {
       return state.cart;
@@ -21,11 +24,20 @@ export const goodsModule = {
     }
   },
   mutations: {
-    setGoods(state, goods) {
-      state.goodsByGroups = goods;
+    setProducts(state, goods) {
+      if(!(goods.Error === '' && goods.Success)) return false;
+      state.products = goods.Value?.Goods?.map((product) => {
+          return {
+            'id': product.T,
+            'name': state.groups_data[product.G].B[product.T].N,
+            'price': product.C,
+            'amount': product.P,
+            'group_id': product.G
+          }
+        });
     },
-    setNames(state, names) {
-      state.names = names;
+    setGroups(state, groups_data) {
+      state.groups_data = groups_data;
     },
     setCurrencies(state, currency) {
       state.currencies.usd = currency;
@@ -37,23 +49,22 @@ export const goodsModule = {
   actions: {
     async fetchGoods({commit}) {
       try {
-        const response = await axios
-          .get('@/api/data.json')
+        const response = await fetch('data.json')
           .then(response => response.json())
-          .then(response => commit('setGoods', response));
+          .then(response => commit('setProducts', response));
       } catch (e) {
         console.error(e);
       }
     },
     async fetchNames({commit}) {
       try {
-        const response = await axios
-          .get('@/api/names.json')
+        const response = await fetch('names.json')
           .then(response => response.json())
-          .then(response => commit('setNames', response));
+          .then(response => commit('setGroups', response));
       } catch (e) {
         console.error(e);
       }
     }
-  }
+  },
+  namespaced: true
 };
