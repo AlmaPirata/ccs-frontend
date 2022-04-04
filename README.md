@@ -1,19 +1,8 @@
 # ccs-test
 
-## Project setup
-```
-npm install
-```
+## TODO
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+- Добавить ограничение по добавлению в корзину
+- Улучшить дизайн проекта
+- Разнести код по компонентам
+- Добавить eslint
