@@ -1,8 +1,6 @@
-import axios from "axios";
-
 export const dataModule = {
   state: () => ({
-    products: {},
+    products: [],
     groups_data: {},
     currencies: {
       usd: 70
@@ -42,8 +40,27 @@ export const dataModule = {
     setCurrencies(state, currency) {
       state.currencies.usd = currency;
     },
-    setCart(state, cart) {
-      state.cart = cart;
+    updateCartItems(state, item) {
+      let indexItemInCart = state.cart.findIndex(i => i.id === item.id);
+      if(indexItemInCart >= 0) {
+        state.cart[indexItemInCart].amount += 1;
+      } else {
+        state.cart.push(
+          {
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            amount: 1
+          }
+        )
+      }
+    },
+    removeCartItem(state, itemId) {
+      console.log(itemId);
+      state.cart = state.cart.filter(i => i.id !== itemId);
+    },
+    removeAllCartItems(state) {
+      state.cart = [];
     }
   },
   actions: {
@@ -64,6 +81,15 @@ export const dataModule = {
       } catch (e) {
         console.error(e);
       }
+    },
+    addCartItem({commit}, productItem) {
+      commit('updateCartItems', productItem);
+    },
+    removeCartItem({commit}, productItemId) {
+      commit('removeCartItem', productItemId);
+    },
+    removeAllCartItems({commit}) {
+      commit('removeAllCartItems');
     }
   },
   namespaced: true
