@@ -6,9 +6,11 @@
                    id="current-currency"
                    class="current-currency"
                    min="20" max="80"
-                   v-model="currencies.usd"
+                   v-model="selectedCurrency"
             >
-            <span>{{ currencies.usd }}</span>
+            <span :class="[`diff-${differenceCurrency}`]">
+                {{ currencies.usd }}
+            </span>
         </div>
         <hr>
         <Panel :header="group.G"
@@ -18,11 +20,17 @@
                class="panel"
         >
             <template #header></template>
-            <div class="book-wrapper">
-                <div class="book-item" v-for="book in productInGroup(i)" :key="book.id">
+            <div class="book-wrapper"
+                 v-if="getProductsInGroup(i).length > 0">
+                <div class="book-item"
+                     v-for="book in getProductsInGroup(i)"
+                     :key="book.id">
                     <div class="book-title">{{ book.name }} ({{ book.amount }})</div>
                     <div class="book-price" @click="addItem(book)">{{ formatedPrice(book.price) }} ₽</div>
                 </div>
+            </div>
+            <div v-else>
+                В данной группе нет товаров
             </div>
         </Panel>
         <hr>
@@ -55,6 +63,12 @@
   import Button from 'primevue/button';
   import Cart from "./components/Cart";
 
+  const DIFFERENCE_VALUES = {
+    higher: 'higher',
+    lower: 'lower',
+    equal: 'equal'
+  };
+
   export default {
     components: {
       Panel,
@@ -62,7 +76,10 @@
       Button
     },
     data() {
-      return {};
+      return {
+        differenceCurrency: 'equal',
+        differenceCurrencyTimeout: null,
+      };
     },
     methods: {
       ...mapActions({
@@ -70,9 +87,10 @@
         fetchGoods: "data/fetchGoods",
         addItem: "data/addCartItem",
         removeItem: "data/removeCartItem",
-        clearCart: "data/removeAllCartItems"
+        clearCart: "data/removeAllCartItems",
+        updateCurrency: "data/updateCurrency"
       }),
-      productInGroup(groupId) {
+      getProductsInGroup(groupId) {
         return this.products.filter(
           (p) => p.group_id === +groupId
         );
@@ -93,8 +111,27 @@
         products: (state) => state.data.products,
         groups_data: (state) => state.data.groups_data,
         currencies: (state) => state.data.currencies,
-        cart: (state) => state.data.cart,
+        cart: (state) => state.data.cart
       }),
+      selectedCurrency: {
+        get () {
+          return this.currencies.usd
+        },
+        set (newCurrency) {
+          clearTimeout(this.differenceCurrencyTimeout);
+
+          if(this.currencies.usd > newCurrency) {
+            this.differenceCurrency = DIFFERENCE_VALUES.higher;
+          } else if(this.currencies.usd < newCurrency) {
+            this.differenceCurrency = DIFFERENCE_VALUES.lower;
+          } else {
+            this.differenceCurrency = DIFFERENCE_VALUES.equal;
+          }
+          this.differenceCurrencyTimeout = setTimeout(() => {this.differenceCurrency = DIFFERENCE_VALUES.equal}, 2500);
+
+          this.updateCurrency(newCurrency)
+        }
+      }
     },
   };
 </script>
@@ -152,5 +189,11 @@
     }
     .current-currency {
         margin-left: 10px;
+    }
+    .diff-higher {
+        background-color: red;
+    }
+    .diff-lower {
+        background-color: green;
     }
 </style>

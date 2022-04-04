@@ -38,7 +38,7 @@ export const dataModule = {
       state.groups_data = groups_data;
     },
     setCurrencies(state, currency) {
-      state.currencies.usd = currency;
+      state.currencies.usd = +currency;
     },
     updateCartItems(state, item) {
       let indexItemInCart = state.cart.findIndex(i => i.id === item.id);
@@ -90,6 +90,9 @@ export const dataModule = {
     },
     removeAllCartItems({commit}) {
       commit('removeAllCartItems');
+    },
+    updateCurrency({commit}, newCurrency) {
+      commit('setCurrencies', newCurrency);
     }
   },
   namespaced: true
